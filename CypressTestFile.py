@@ -29,7 +29,7 @@ class CypressTestFile:
         <img src="https://mwstake.org/mwstake/branding/logo.png" style="width:50px;"/>
         <ol>
             <li>
-                This is the <b>documentation on the use cases</b> enabled in the <a href="https://www.mediawiki.org/wiki/Extension:Page_Exchange">Page Exchange</a> package <a href="{self.repository_url}">{self.repository_url}</a>.
+                This is the <b>documentation on the use cases</b> enabled by <a href="{self.repository_url}">{self.repository_url}</a>.
             </li>
             <li>
                 These use cases based on <a href='{self.repository_url}/tree/main/cypress/e2e/{self.cypress_file_path.name.split('/')[-1]}'>{self.cypress_file_path.name.split('/')[-1]}</a> are curated by MWStake and currently <b>certified for MWCore 1.36</b> in conjunction with <a href="">this set of extensions</a>.
@@ -216,8 +216,7 @@ class CypressTestFile:
             list(
                 map(
                     lambda x: f"<span class='command'>{x[0]}</span>(<span class='arguments'>{x[1]}</span>)",
-                    re.findall(
-                        r"Cypress\.Commands\.add\(\"(\w+)\", \(([, \w]*)\) => {", text),
+                    re.findall(r"Cypress\.Commands\.add\(\"(\w+)\", \(([, \w]*)\) => {", text),
                 )
             )
         )
