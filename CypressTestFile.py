@@ -4,9 +4,11 @@ from termcolor import colored
 
 
 class CypressTestFile:
-    def __init__(self, cypress_file_path, images_path, repository_url, htmlpreview):
+    def __init__(self, name, cypress_file_path, remote_images_path, local_images_path, repository_url, htmlpreview):
+        self.name = name
         self.cypress_file_path = cypress_file_path
-        self.images_path = images_path
+        self.remote_images_path = remote_images_path
+        self.local_images_path = local_images_path
         self.repository_url = repository_url
         self.htmlpreview = htmlpreview
         file = open(cypress_file_path, "r")
@@ -15,7 +17,7 @@ class CypressTestFile:
         file.close()
 
     def _delete_screenshots(self):
-        for image_path in os.scandir("/home/lex/mediawiki-pages-EPPO/readme_images"):
+        for image_path in os.scandir(self.local_images_path):
             os.remove(image_path)
 
     def document(self, mode):
@@ -55,7 +57,7 @@ class CypressTestFile:
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                <title>MWStake Doc</title>
+                <title>{self.name}</title>
                 <link rel="stylesheet" href="style.css">
             </head>
             <body>
@@ -157,7 +159,7 @@ class CypressTestFile:
         self.images = "".join(
             list(
                 map(
-                    lambda x: f'<figure id="{x}" class="hide"><figcaption>{x}</figcaption><img class="screenshotPNG" src="{self.images_path}/{x}.png" /><figcaption>{x}</figcaption></figure>',
+                    lambda x: f'<figure id="{x}" class="hide"><figcaption>{x}</figcaption><img class="screenshotPNG" src="{self.remote_images_path}/{x}.png" /><figcaption>{x}</figcaption></figure>',
                     re.findall(self._screenshot_name_pattern()[0], self.text),
                 )
             )
@@ -168,7 +170,7 @@ class CypressTestFile:
             [r"^ *(cy.(get)).+", {"python": "", "html": ""}],
             [r"^(?! *(describe|it|cy.|//)).+\n", {"python": "", "html": ""}],
             [
-                r"^describe\(\"(\w*)\",.*",
+                r"^describe\(\"([\w -]*)\",.*",
                 {
                     "python": colored("ASPECT", "green", attrs=["bold", "underline"]) + " \\1\n",
                     "html": "<div class='describe'><span class='aspect'>Aspect</span>: <b>\\1</b></div>",
