@@ -1,6 +1,15 @@
 # tests-documentation-maker (TDM)
 
 ```bash
+cd /home/lex/cypress/Cypress && ./Cypress
+```
+
+```bash
+git clone https://github.com/dataspects/tests-documentation-maker.git
+cd tests-documentation-maker
+```
+
+```bash
 name="Doc for dataspects Search" \
 repository_url="https://github.com/dataspects/DataspectsSearch" \
 cypress_test_folder="/home/lex/mwstakeorgdevclone/extensions/DataspectsSearch/cypress/e2e" \
@@ -12,3 +21,5 @@ commands="/home/lex/mwstakeorgdevclone/extensions/DataspectsSearch/cypress/suppo
 commands_html="/home/lex/mwstakeorgdevclone/extensions/DataspectsSearch/commands.html" \
 python3 -m unittest test_parse_cypress_tests.py
 ```
+
+View `tests_doc_html` in a browser.
