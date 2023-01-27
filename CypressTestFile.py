@@ -22,7 +22,8 @@ class CypressTestFile:
 
     def document(self, mode):
         doc = self.text
-        for repl in self._replacements():
+        for repl in self._replacements(): # Recurse
+            # FIXME: Filter
             doc = re.sub(repl[0], repl[1][mode], doc, flags=re.M)
         return doc
 
@@ -34,10 +35,13 @@ class CypressTestFile:
                 This is the <b>documentation on the use cases</b> enabled by <a href="{self.repository_url}">{self.repository_url}</a>.
             </li>
             <li>
-                These use cases based on <a href='{self.repository_url}/tree/main/cypress/e2e/{self.cypress_file_path.name.split('/')[-1]}'>{self.cypress_file_path.name.split('/')[-1]}</a> are curated by MWStake and currently <b>certified for MWCore 1.36</b> in conjunction with <a href="">this set of extensions</a>.
+                These use cases based on <a href='{self.repository_url}/tree/main/cypress/e2e/{self.file_name()}'>{self.file_name()}</a> are curated by MWStake and currently <b>certified for MWCore 1.36</b> in conjunction with <a href="">this set of extensions</a>.
             </li>
         </ol>
         """
+
+    def file_name(self):
+        return self.cypress_file_path.name.split('/')[-1]
 
     def _script(self):
         return """
@@ -170,7 +174,7 @@ class CypressTestFile:
             [r"^ *(cy.(get)).+", {"python": "", "html": ""}],
             [r"^(?! *(describe|it|cy.|//)).+\n", {"python": "", "html": ""}],
             [
-                r"^describe\(\"([\w -]*)\",.*",
+                r"^describe\(\"([\w -:]*)\",.*",
                 {
                     "python": colored("ASPECT", "green", attrs=["bold", "underline"]) + " \\1\n",
                     "html": "<div class='describe'><span class='aspect'>Aspect</span>: <b>\\1</b></div>",

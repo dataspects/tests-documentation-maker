@@ -1,4 +1,4 @@
-import unittest, os
+import unittest, os, sys
 from CypressTestFile import CypressTestFile
 
 
@@ -11,11 +11,12 @@ class CypressTestFileTest(unittest.TestCase):
         self.htmlpreview = os.getenv("htmlpreview")
         self.remote_images_path = os.getenv("remote_images_path")
         self.local_images_path = os.getenv("local_images_path")
-        self.tests_doc_html = os.getenv("tests_doc_html")
+        self.doc_folder_path = os.getenv("doc_folder_path")
         self.commands = os.getenv("commands")
         self.commands_html = os.getenv("commands_html")
 
-    def test_tests_doc_html(self):
+    def test_doc_folder_path(self):
+        self.promptForUserConfirmation()
         for file_path in os.scandir(self.cypress_test_folder):
             ctf = CypressTestFile(
                 self.name,
@@ -26,7 +27,14 @@ class CypressTestFileTest(unittest.TestCase):
                 self.htmlpreview,
             )
             print(ctf.document("python"))
-            ctf.save_html_document(self.tests_doc_html)
+            ctf.save_html_document(self.doc_folder_path+ctf.file_name()+".html")
+            print("See file://"+self.doc_folder_path)
 
     def test_list_commands(self):
         CypressTestFile.list_commands(self.commands, self.commands_html)
+
+    def promptForUserConfirmation(self, resp=False):
+        print("Did you run all the Cypress tests? (y/n)")
+        answer = input()
+        if answer != "y":
+            sys.exit()
