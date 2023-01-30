@@ -20,7 +20,6 @@ class CypressTestFile:
 
     def document(self, mode):
         doc = self.text
-        pprint.pprint(self._replacements())
         for repl in self._replacements(): # Recurse
             # FIXME: Filter
             # mode = python or html
@@ -124,7 +123,8 @@ class CypressTestFile:
                     padding:10px;
                 }
                 .screenshotPNG {
-                    box-shadow: -20px -20px 10px grey;
+                    box-shadow: -5px -5px 5px grey;
+                    width:500px;
                 }
                 .command {
                     font-weight:bold;
@@ -143,7 +143,7 @@ class CypressTestFile:
                     "python": colored("See", "blue") + " \\1",
                     "html": """
                         <div class='left60'>
-                            <span class='screenshot'>&rarr; Screenshot: </span> \\1
+                            
                             <img class="screenshotPNG" src='"""+self.remote_images_path+"""/\\1.png' />
                         </div>""",
                     "image": "\\1",
@@ -155,7 +155,19 @@ class CypressTestFile:
                     "python": colored("See", "blue") + " \\1",
                     "html": """
                         <div class='left60'>
-                            <span class='screenshot'>&rarr; Screenshot: </span> \\1
+                            
+                            <img class="screenshotPNG" src='"""+self.remote_images_path+"""/\\1.png' />
+                        </div>""",
+                    "image": "\\1",
+                }
+            ],
+            [
+                r"cy.clip_screenshot_and_save_search_facet\(unixTimestamp, \"(.*)\"\);",
+                {
+                    "python": colored("See", "blue") + " \\1",
+                    "html": """
+                        <div class='left60'>
+                            
                             <img class="screenshotPNG" src='"""+self.remote_images_path+"""/\\1.png' />
                         </div>""",
                     "image": "\\1",
@@ -190,6 +202,13 @@ class CypressTestFile:
                 },
             ]
         ] + self._screenshot_name_patterns() + [
+            [   # Remove cy.__* commands
+                r"cy.(__\w*)\(.*(\);)?",
+                {
+                    "python": "",
+                    "html": "",
+                },
+            ],
             [
                 r"cy.(\w*)\(.*(\);)?",
                 {
@@ -197,8 +216,19 @@ class CypressTestFile:
                     "html": f"<div class='left40'><span class='do'>Do</span> <a href='{self.htmlpreview}/commands.html' class='command' title='Click to get an explanation for \\1'>\\1</a>(<span class='arguments'></span>)</div>",
                 },
             ],
-            [r", \((.*)\) => {", {"python": "\\1", "html": "\\1"}],
-            [r"\);\n", {"python": "", "html": ""}],
+            [   
+                r", \((.*)\) => {",
+                {
+                    "python": "\\1",
+                    "html": "\\1"
+                }
+            ],
+            [   r"\);\n",
+                {
+                    "python": "",
+                    "html": ""
+                }
+            ],
             [
                 r"^( +)// *(.*)$",
                 {

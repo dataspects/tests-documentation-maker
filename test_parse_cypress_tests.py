@@ -44,9 +44,9 @@ class CypressTestFileTest(unittest.TestCase):
         for file_path in os.scandir(self.local_images_path):
             url = self.local_images_path+"/"+file_path.name
             
-            comps = os.path.basename(url).split("__")
+            comps = os.path.basename(file_path.name).split("__")
             if len(comps) > 1:
-                final_filename = comps[0]
+                final_filename = comps[0]+".png"
                 surroundings_frame_factor = int(comps[1].replace(".png", "")) + 80
                 
                 screenshot = cairo.ImageSurface.create_from_png(url)
