@@ -1,4 +1,4 @@
-import unittest, os, sys
+import unittest, os, sys, cairo
 from CypressTestFile import CypressTestFile
 
 
@@ -16,6 +16,7 @@ class CypressTestFileTest(unittest.TestCase):
         self.commands_html = os.getenv("commands_html")
 
     def test_doc_folder_path(self):
+        self._annotate_screenshots()
         self.promptForUserConfirmation()
         for file_path in os.scandir(self.cypress_test_folder):
             ctf = CypressTestFile(
@@ -38,3 +39,33 @@ class CypressTestFileTest(unittest.TestCase):
         answer = input()
         if answer != "y":
             sys.exit()
+
+    def _annotate_screenshots(self):
+        for file_path in os.scandir(self.local_images_path):
+            url = self.local_images_path+"/"+file_path.name
+            
+            final_filename = os.path.basename(url).split("__")[0]+".png"
+            surroundings_frame_factor = int(os.path.basename(url).split("__")[1].replace(".png", "")) + 80
+            
+            screenshot = cairo.ImageSurface.create_from_png(url)
+            screenshot_height = screenshot.get_height()
+            screenshot_width = screenshot.get_width()
+            
+            element_height = screenshot_height - surroundings_frame_factor
+            element_width = screenshot_width - surroundings_frame_factor
+
+            pat = cairo.LinearGradient(0.0, 0.0, 0.0, 1.0)
+            pat.add_color_stop_rgba(1, 0.7, 0, 0, 0.3)
+
+            ctx = cairo.Context(screenshot)
+            ctx.rectangle(
+                surroundings_frame_factor / 2,
+                surroundings_frame_factor / 2,
+                element_width,
+                element_height
+            )
+
+            ctx.set_source(pat)
+            ctx.fill()
+            os.remove(url)
+            screenshot.write_to_png(self.local_images_path+"/"+final_filename)
