@@ -1,5 +1,4 @@
-import os
-import re
+import os, re, pprint
 from termcolor import colored
 
 
@@ -13,7 +12,6 @@ class CypressTestFile:
         self.htmlpreview = htmlpreview
         file = open(cypress_file_path, "r")
         self.text = file.read()
-        self._extract_screenshots()
         file.close()
 
     def _delete_screenshots(self):
@@ -22,8 +20,10 @@ class CypressTestFile:
 
     def document(self, mode):
         doc = self.text
+        pprint.pprint(self._replacements())
         for repl in self._replacements(): # Recurse
             # FIXME: Filter
+            # mode = python or html
             doc = re.sub(repl[0], repl[1][mode], doc, flags=re.M)
         return doc
 
@@ -46,10 +46,6 @@ class CypressTestFile:
     def _script(self):
         return """
             <script>
-                function toggleImage(imageID) {
-                    var img = document.querySelector(`#${imageID}`);
-                    img.classList.toggle('hide');
-                }
             </script>
         """
 
@@ -67,11 +63,7 @@ class CypressTestFile:
             <body>
                 {self._script()} 
                 {self._header()}
-                <table><tr><td>
-                    {self.document("html")}
-                </td><td>
-                    {self.images}
-                </td></tr></table>
+                {self.document("html")}
             </body>
             </html>
             
@@ -132,9 +124,6 @@ class CypressTestFile:
                     padding:10px;
                 }
                 .screenshotPNG {
-                    width:600px;
-                    position: fixed;
-                    top:50px;
                     box-shadow: -20px -20px 10px grey;
                 }
                 .command {
@@ -146,29 +135,35 @@ class CypressTestFile:
             </style>
         """
 
-    def _screenshot_name_pattern(self):
+    def _screenshot_name_patterns(self):
         return [
-            r"cy.take_screenshot\(\"(.*)\"\);",
-            {
-                "python": colored("See", "blue") + " \\1",
-                "html": """
-                    <div class='left60' style='cursor: help;' onmouseover=\"toggleImage('\\1')\" onmouseout=\"toggleImage('\\1')\">
-                        <span class='screenshot'>&rarr; Screenshot: </span> \\1
-                    </div>""",
-                "image": "\\1",
-            },
+            [
+                r"cy.take_screenshot\(\"(.*)\"\);",
+                {
+                    "python": colored("See", "blue") + " \\1",
+                    "html": """
+                        <div class='left60'>
+                            <span class='screenshot'>&rarr; Screenshot: </span> \\1
+                            <img class="screenshotPNG" src='"""+self.remote_images_path+"""/\\1.png' />
+                        </div>""",
+                    "image": "\\1",
+                }
+            ],
+            [
+                r"cy.clip_screenshot_and_click\(\$target, \"(.*)\"\);",
+                {
+                    "python": colored("See", "blue") + " \\1",
+                    "html": """
+                        <div class='left60'>
+                            <span class='screenshot'>&rarr; Screenshot: </span> \\1
+                            <img class="screenshotPNG" src='"""+self.remote_images_path+"""/\\1.png' />
+                        </div>""",
+                    "image": "\\1",
+                }
+            ]
         ]
 
-    def _extract_screenshots(self):
-        self.images = "".join(
-            list(
-                map(
-                    lambda x: f'<figure id="{x}" class="hide"><figcaption>{x}</figcaption><img class="screenshotPNG" src="{self.remote_images_path}/{x}.png" /><figcaption>{x}</figcaption></figure>',
-                    re.findall(self._screenshot_name_pattern()[0], self.text),
-                )
-            )
-        )
-
+    
     def _replacements(self):
         return [
             [r"^ *(cy.(get)).+", {"python": "", "html": ""}],
@@ -193,8 +188,8 @@ class CypressTestFile:
                     "python": colored("Go to", "yellow") + " \\1",
                     "html": "<div class='left40'><span class='goto'>Go to</span> \\1</div>",
                 },
-            ],
-            self._screenshot_name_pattern(),
+            ]
+        ] + self._screenshot_name_patterns() + [
             [
                 r"cy.(\w*)\(.*(\);)?",
                 {
