@@ -148,7 +148,7 @@ class CypressTestFile:
 
     def _screenshot_name_pattern(self):
         return [
-            r"cy.takeScreenshot\(\"(.*)\"\);",
+            r"cy.take_screenshot\(\"(.*)\"\);",
             {
                 "python": colored("See", "blue") + " \\1",
                 "html": """
@@ -181,7 +181,7 @@ class CypressTestFile:
                 },
             ],
             [
-                r"^ +it\.?[a-z]*\(\"(.*)\"",
+                r"^ ?it\.?[a-z]*\(\"(.*)\"",
                 {
                     "python": colored("Use Case: ", "green", attrs=["bold"]) + "it \\1",
                     "html": "<div class='left20'><span class='feature'>Use Case</span>: <b>it \\1</b></div>",

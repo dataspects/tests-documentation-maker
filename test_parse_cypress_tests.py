@@ -34,7 +34,7 @@ class CypressTestFileTest(unittest.TestCase):
         CypressTestFile.list_commands(self.commands, self.commands_html)
 
     def promptForUserConfirmation(self, resp=False):
-        print("Did you run all the Cypress tests? (y/n)")
+        print("Did you run all the Cypress tests in "+self.cypress_test_folder+" ? (y/n)")
         answer = input()
         if answer != "y":
             sys.exit()
