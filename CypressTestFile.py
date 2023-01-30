@@ -138,7 +138,7 @@ class CypressTestFile:
     def _screenshot_name_patterns(self):
         return [
             [
-                r"cy.take_screenshot\(\"(.*)\"\);",
+                r"cy.__take_screenshot\(\"(.*)\"\);",
                 {
                     "python": colored("See", "blue") + " \\1",
                     "html": """
