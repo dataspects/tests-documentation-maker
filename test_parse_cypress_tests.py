@@ -17,7 +17,7 @@ class CypressTestFileTest(unittest.TestCase):
 
     def test_doc_folder_path(self):
         self._annotate_screenshots()
-        self.promptForUserConfirmation()
+        # self.promptForUserConfirmation()
         for file_path in os.scandir(self.cypress_test_folder):
             ctf = CypressTestFile(
                 self.name,

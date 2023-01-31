@@ -24,7 +24,7 @@ class CypressTestFile:
             # FIXME: Filter
             # mode = python or html
             doc = re.sub(repl[0], repl[1][mode], doc, flags=re.M)
-        return doc
+        return "<table>" + doc + "</table>"
 
     def _header(self):
         return f"""
@@ -34,7 +34,7 @@ class CypressTestFile:
                 This is the <b>documentation on the use cases</b> enabled by <a href="{self.repository_url}">{self.repository_url}</a>.
             </li>
             <li>
-                These use cases based on <a href='{self.repository_url}/tree/main/cypress/e2e/{self.file_name()}'>{self.file_name()}</a> are curated by MWStake and currently <b>certified for MWCore 1.36</b> in conjunction with <a href="">this set of extensions</a>.
+                These use cases based on <a href='{self.repository_url}/tree/main/cypress/e2e/CRUD/{self.file_name()}'>{self.file_name()}</a> are curated by MWStake and currently <b>certified for MWCore 1.36</b> in conjunction with <a href="">this set of extensions</a>.
             </li>
         </ol>
         """
@@ -75,6 +75,9 @@ class CypressTestFile:
     def styles():
         return """
             <style>
+                td {
+                    border: 1px solid gray;
+                }
                 .hide {
                     display: none;
                 }
@@ -136,40 +139,35 @@ class CypressTestFile:
         """
 
     def _screenshot_name_patterns(self):
+        html = """
+                    <tr><td>
+                        <div class='left40'>\\1</div></td><td>
+                        <div class='left60'>
+                            <img class="screenshotPNG" src='"""+self.remote_images_path+"""/\\1.png' />
+                        </div>
+                    </td></tr>"""
         return [
             [
                 r"cy.__take_screenshot\(\"(.*)\"\);",
                 {
                     "python": colored("See", "blue") + " \\1",
-                    "html": """
-                        <div class='left60'>
-                            
-                            <img class="screenshotPNG" src='"""+self.remote_images_path+"""/\\1.png' />
-                        </div>""",
+                    "html": html,
                     "image": "\\1",
                 }
             ],
             [
-                r"cy.clip_screenshot_and_click\(\$target, \"(.*)\"\);",
+                r"cy.clip_screenshot_and_click\(\n?\$target,[\n ]?\"(.*)\"\n?\);",
                 {
                     "python": colored("See", "blue") + " \\1",
-                    "html": """
-                        <div class='left60'>
-                            
-                            <img class="screenshotPNG" src='"""+self.remote_images_path+"""/\\1.png' />
-                        </div>""",
+                    "html": html,
                     "image": "\\1",
                 }
             ],
             [
-                r"cy.clip_screenshot_and_save_search_facet\(unixTimestamp, \"(.*)\"\);",
+                r"cy.clip_screenshot_and_save_search_facet\(\n?unixTimestamp,[\n ]?\"(.*)\"\n?\);",
                 {
                     "python": colored("See", "blue") + " \\1",
-                    "html": """
-                        <div class='left60'>
-                            
-                            <img class="screenshotPNG" src='"""+self.remote_images_path+"""/\\1.png' />
-                        </div>""",
+                    "html": html,
                     "image": "\\1",
                 }
             ]
@@ -184,21 +182,21 @@ class CypressTestFile:
                 r"^describe\(\"([\w -:]*)\",.*",
                 {
                     "python": colored("ASPECT", "green", attrs=["bold", "underline"]) + " \\1\n",
-                    "html": "<div class='describe'><span class='aspect'>Aspect</span>: <b>\\1</b></div>",
+                    "html": "<tr><td colspan=2><div class='describe'><span class='aspect'>Aspect</span>: <b>\\1</b></div></td></tr>",
                 },
             ],
             [
                 r"^ ?it\.?[a-z]*\(\"(.*)\"",
                 {
                     "python": colored("Use Case: ", "green", attrs=["bold"]) + "it \\1",
-                    "html": "<div class='left20'><span class='feature'>Use Case</span>: <b>it \\1</b></div>",
+                    "html": "<tr><td colspan=2><div class='left20'><span class='feature'>Use Case</span>: <b>it \\1</b></div></td></tr>",
                 },
             ],
             [
                 r"cy.visit\(\"(.*)\"\);",
                 {
                     "python": colored("Go to", "yellow") + " \\1",
-                    "html": "<div class='left40'><span class='goto'>Go to</span> \\1</div>",
+                    "html": "<tr><td colspan=2><div class='left40'><span class='goto'>Go to</span> \\1</div></td></tr>",
                 },
             ]
         ] + self._screenshot_name_patterns() + [
@@ -213,7 +211,7 @@ class CypressTestFile:
                 r"cy.(\w*)\(.*(\);)?",
                 {
                     "python": colored("Do", "yellow") + " \\1()",
-                    "html": f"<div class='left40'><span class='do'>Do</span> <a href='{self.htmlpreview}/commands.html' class='command' title='Click to get an explanation for \\1'>\\1</a>(<span class='arguments'></span>)</div>",
+                    "html": f"<tr><td colspan=2><div class='left40'><span class='do'>Do</span> <a href='{self.htmlpreview}/commands.html' class='command' title='Click to get an explanation for \\1'>\\1</a>(<span class='arguments'></span>)</div></td></tr>",
                 },
             ],
             [   
@@ -233,7 +231,7 @@ class CypressTestFile:
                 r"^( +)// *(.*)$",
                 {
                     "python": colored("\\1\\2", "yellow"),
-                    "html": "<div class='left40 comment'>\\1\\2</div>",
+                    "html": "<tr><td colspan=2><div class='left40 comment'>\\1\\2</div></td></tr>",
                 },
             ],
         ]
